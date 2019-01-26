@@ -40,7 +40,7 @@ for i in range(train_type1):
     imtrain[i] = scipy.misc.imread(train_type1_loc + str(i+1) + ".jpg",mode="RGB")
 for i in range(train_type2):
     imtrain[i+train_type1] = scipy.misc.imread(train_type2_loc + str(i+1) + ".jpg",mode="RGB")
-    
+
 #imtrain is a list with train_im_no images inside at the moment
 #imtrain = [as.list(image) for image in imtrain]
 imtest = np.zeros((test_im_no,pixels,pixels,colours))
