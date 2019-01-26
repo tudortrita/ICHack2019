@@ -42,8 +42,8 @@ for i in range(train_type1):
 for i in range(train_type2):
     imtrain[i+train_type1] = scipy.misc.imread(train_type2_loc + str(i+1) + ".jpg",mode="RGB")
 
-#imtrain is a list with train_im_no images inside at the moment
-#imtrain = [as.list(image) for image in imtrain]
+imtrain is a list with train_im_no images inside at the moment
+imtrain = [as.list(image) for image in imtrain]
 imtest = np.zeros((test_im_no,pixels1,pixels2,colours))
 
 for i in range(test_type1):
@@ -78,10 +78,10 @@ y_test = np_utils.to_categorical(y_test, 2)
 
 # Initialise layers
 inputlayer = Input(shape = (pixels1, pixels2, colours))
-#hidden = Conv2D(32, 8, strides=(1, 1), activation='tanh')(inputlayer)
-#hidden = MaxPooling2D()(hidden)
-#hidden = Conv2D(32, 8, strides=(1, 1), activation='tanh')(hidden)
-#hidden = MaxPooling2D()(hidden)
+hidden = Conv2D(32, 8, strides=(1, 1), activation='tanh')(inputlayer)
+hidden = MaxPooling2D()(hidden)
+hidden = Conv2D(32, 8, strides=(1, 1), activation='tanh')(hidden)
+hidden = MaxPooling2D()(hidden)
 outputlayer = Flatten()(inputlayer)
 outputlayer = Dense(30, activation='sigmoid')(outputlayer)
 outputlayer = Dense(30, activation='sigmoid')(outputlayer)
@@ -102,18 +102,12 @@ prediction_signature = (
                 method_name=tf.saved_model.signature_constants.PREDICT_METHOD_NAME))
 
 #SAVE MODEL
-export_path = 'C:/Users/Tudor Trita/Desktop/ichack2019/AI_Backend/SavedModelFolder'
+export_path = 'C:/Users/Tudor Trita/Desktop/ichack2019/AI_Backend/SavedModelFolder2'
 print('Exporting trained model to', export_path)
 builder = tf.saved_model.builder.SavedModelBuilder(export_path)
 builder.add_meta_graph_and_variables(
       sess, [tf.saved_model.tag_constants.SERVING], signature_def_map={'predict_images':prediction_signature})
 builder.save()
-
-
-
-
-
-
 
 # Evaluate trained network
 score = model.evaluate(x_test, y_test, batch_size=32)
