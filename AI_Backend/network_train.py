@@ -1,23 +1,17 @@
-from keras.datasets import mnist
 from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense
 from keras.utils import np_utils
 import numpy as np
-import matplotlib.pyplot as plt
-import random
-import scipy.misc
-import sys
 import tensorflow as tf
 import imageio
-# Best run: 0.9901
 
-# To neatly handle global variables later
+#Starting a tensorflow session with global variables
 sess = tf.InteractiveSession()
 init_g = tf.global_variables_initializer()
 init_l = tf.local_variables_initializer()
 sess.run(init_g)
 sess.run(init_l)
-    
+
 #Parameters:
 pixels1 = 100
 pixels2 = 100
@@ -39,27 +33,27 @@ test_type2_loc = "testdata/Banana/"
 #No of colours (B/W: 1, RGB: 3)
 colours = 3
 
-#Loading images:
+#Loading training images:
 imtrain = np.zeros((train_im_no,pixels1,pixels2,colours))
 
 for i in range(train_type1):
-    imtrain[i] = imageio.imread(train_type1_loc + str(i+1) + ".jpg")#,mode="RGB")
+    imtrain[i] = imageio.imread(train_type1_loc + str(i+1) + ".jpg")
 for i in range(train_type2):
-    imtrain[i+train_type1] = imageio.imread(train_type2_loc + str(i+1) + ".jpg")#,mode="RGB")
+    imtrain[i+train_type1] = imageio.imread(train_type2_loc + str(i+1) + ".jpg")
 
-#imtrain = [as.list(image) for image in imtrain]
+#Loading test images:
 imtest = np.zeros((test_im_no,pixels1,pixels2,colours))
 
 for i in range(test_type1):
-    imtest[i] = imageio.imread(test_type1_loc + str(i+1) + ".jpg")#,mode="RGB")
+    imtest[i] = imageio.imread(test_type1_loc + str(i+1) + ".jpg")
 for i in range(test_type2):
-    imtest[i+test_type1] = imageio.imread(test_type2_loc + str(i+1) + ".jpg")#,mode="RGB")
+    imtest[i+test_type1] = imageio.imread(test_type2_loc + str(i+1) + ".jpg")
 
-#imtest is a list with test_im_no items inside
-
+#Defining y_train
 y_train = np.zeros(train_im_no)
 y_train[train_type1:] = 1 
 
+#Defining y_test
 y_test = np.zeros(test_im_no)
 y_test[test_type2:] = 1
 
@@ -90,8 +84,6 @@ outputlayer = Flatten()(hidden)
 outputlayer = Dense(30, activation='sigmoid')(outputlayer)
 outputlayer = Dense(30, activation='sigmoid')(outputlayer)
 outputlayer = Dense(2, activation='sigmoid')(outputlayer)
-
-#tf.global_variables_initializer()
 
 # Make an instance of the model with the above layers, choose its optimizer/loss etc., and train it
 model = Model(inputlayer, outputlayer)
