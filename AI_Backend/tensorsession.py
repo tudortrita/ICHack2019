@@ -8,11 +8,16 @@ import random
 import scipy.misc
 import sys
 import tensorflow as tf
+import imageio
 # Best run: 0.9901
 
 # To neatly handle global variables later
 sess = tf.InteractiveSession()
-
+init_g = tf.global_variables_initializer()
+init_l = tf.local_variables_initializer()
+sess.run(init_g)
+sess.run(init_l)
+    
 #Parameters:
 pixels1 = 100
 pixels2 = 100
@@ -38,18 +43,17 @@ colours = 3
 imtrain = np.zeros((train_im_no,pixels1,pixels2,colours))
 
 for i in range(train_type1):
-    imtrain[i] = scipy.misc.imread(train_type1_loc + str(i+1) + ".jpg",mode="RGB")
+    imtrain[i] = imageio.imread(train_type1_loc + str(i+1) + ".jpg")#,mode="RGB")
 for i in range(train_type2):
-    imtrain[i+train_type1] = scipy.misc.imread(train_type2_loc + str(i+1) + ".jpg",mode="RGB")
+    imtrain[i+train_type1] = imageio.imread(train_type2_loc + str(i+1) + ".jpg")#,mode="RGB")
 
-imtrain is a list with train_im_no images inside at the moment
-imtrain = [as.list(image) for image in imtrain]
+#imtrain = [as.list(image) for image in imtrain]
 imtest = np.zeros((test_im_no,pixels1,pixels2,colours))
 
 for i in range(test_type1):
-    imtest[i] = scipy.misc.imread(test_type1_loc + str(i+1) + ".jpg",mode="RGB")
+    imtest[i] = imageio.imread(test_type1_loc + str(i+1) + ".jpg")#,mode="RGB")
 for i in range(test_type2):
-    imtest[i+test_type1] = scipy.misc.imread(test_type2_loc + str(i+1) + ".jpg",mode="RGB")
+    imtest[i+test_type1] = imageio.imread(test_type2_loc + str(i+1) + ".jpg")#,mode="RGB")
 
 #imtest is a list with test_im_no items inside
 
@@ -82,18 +86,23 @@ hidden = Conv2D(32, 8, strides=(1, 1), activation='tanh')(inputlayer)
 hidden = MaxPooling2D()(hidden)
 hidden = Conv2D(32, 8, strides=(1, 1), activation='tanh')(hidden)
 hidden = MaxPooling2D()(hidden)
-outputlayer = Flatten()(inputlayer)
+outputlayer = Flatten()(hidden)
 outputlayer = Dense(30, activation='sigmoid')(outputlayer)
 outputlayer = Dense(30, activation='sigmoid')(outputlayer)
 outputlayer = Dense(2, activation='sigmoid')(outputlayer)
 
+#tf.global_variables_initializer()
+
 # Make an instance of the model with the above layers, choose its optimizer/loss etc., and train it
 model = Model(inputlayer, outputlayer)
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-model.fit(x_train, y_train, batch_size=32, epochs=5)
+model.fit(x_train, y_train, batch_size=32, epochs=2)
 
-tensor_info_x = tf.saved_model.utils.build_tensor_info(inputlayer)
-tensor_info_y = tf.saved_model.utils.build_tensor_info(outputlayer)
+x = tf.placeholder(tf.float32, shape=[pixels1, pixels2, colours])
+y = tf.placeholder(tf.float32, shape=[None, 2])
+
+tensor_info_x = tf.saved_model.utils.build_tensor_info(x)
+tensor_info_y = tf.saved_model.utils.build_tensor_info(y)
 
 prediction_signature = (
         tf.saved_model.signature_def_utils.build_signature_def(
@@ -102,7 +111,7 @@ prediction_signature = (
                 method_name=tf.saved_model.signature_constants.PREDICT_METHOD_NAME))
 
 #SAVE MODEL
-export_path = 'C:/Users/Tudor Trita/Desktop/ichack2019/AI_Backend/SavedModelFolder2'
+export_path = 'C:/Users/Tudor Trita/Desktop/ichack2019/AI_Backend/ModelSaved'
 print('Exporting trained model to', export_path)
 builder = tf.saved_model.builder.SavedModelBuilder(export_path)
 builder.add_meta_graph_and_variables(
@@ -123,24 +132,18 @@ incorrect_indices = np.nonzero(predicted_classes != y_test)[0]
 
 
 sess.close()
-sys.exit()
-
-
-
-
-
 
 
 
 # See some incorrectly-classes images
-fig, axes = plt.subplots(nrows=3, ncols=3)
-fig.tight_layout()
-random.shuffle(incorrect_indices)
-for i, incorrect in enumerate(incorrect_indices[:9]):
-    plt.subplot(3,3,i+1)
-    plt.imshow(x_test[incorrect].reshape(pixels1,pixels2), cmap='gray', interpolation='none')
-    plt.title('Predicted %s, Actual %s' %(predicted_classes[incorrect], y_test[incorrect]))
-plt.show()
+#fig, axes = plt.subplots(nrows=3, ncols=3)
+#fig.tight_layout()
+#random.shuffle(incorrect_indices)
+#for i, incorrect in enumerate(incorrect_indices[:9]):
+#    plt.subplot(3,3,i+1)
+#    plt.imshow(x_test[incorrect].reshape(pixels1,pixels2), cmap='gray', interpolation='none')
+#    plt.title('Predicted %s, Actual %s' %(predicted_classes[incorrect], y_test[incorrect]))
+#plt.show()
 
 
 
